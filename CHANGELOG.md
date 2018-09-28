@@ -8,7 +8,7 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ### Added
 
-Everything.
+N/A
 
 ### Changed
 
@@ -22,6 +22,12 @@ N/A
 
 N/A
 
+## [0.1.1] - 2018-10-29
+
+Had to bump the version to make the readme show up on [crates.io](https://crates.io/crates/serializers).
+
 ## 0.1.0 - 2018-10-29
 
 Initial release.
+
+[0.1.1]: https://github.com/davidpdrsn/robin/compare/v0.1.0...v0.1.1

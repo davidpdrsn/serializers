@@ -12,7 +12,7 @@ associations it includes.
 
 ```toml
 [dependencies]
-serializers = "0.1.0"
+serializers = "0.1.1"
 ```
 
 ## Example
