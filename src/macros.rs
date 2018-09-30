@@ -32,7 +32,7 @@
 /// }
 ///
 /// serializer! {
-///     pub serialize_user: User {
+///     pub serialize_user<User> {
 ///         attr(identifier, id)
 ///         has_one(homeland, country, serialize_country)
 ///         has_many(buddies, friends, serialize_user)
@@ -40,7 +40,7 @@
 /// }
 ///
 /// serializer! {
-///     pub(crate) serialize_country: Country {
+///     pub(crate) serialize_country<Country> {
 ///         attr(code, id)
 ///     }
 /// }
@@ -74,7 +74,7 @@
 macro_rules! serializer {
     // entry points
     {
-        pub(crate) $name:ident: $type:ty { $($rest:tt)* }
+        pub(crate) $name:ident<$type:ty> { $($rest:tt)* }
     } => {
         #[allow(missing_docs, dead_code)]
         pub(crate) fn $name(v: &$type, b: &mut Builder) {
@@ -83,7 +83,7 @@ macro_rules! serializer {
     };
 
     {
-        pub $name:ident: $type:ty { $($rest:tt)* }
+        pub $name:ident<$type:ty> { $($rest:tt)* }
     } => {
         #[allow(missing_docs, dead_code)]
         pub fn $name(v: &$type, b: &mut Builder) {
@@ -92,7 +92,7 @@ macro_rules! serializer {
     };
 
     {
-        $name:ident: $type:ty { $($rest:tt)* }
+        $name:ident<$type:ty> { $($rest:tt)* }
     } => {
         #[allow(missing_docs, dead_code)]
         fn $name(v: &$type, b: &mut Builder) {

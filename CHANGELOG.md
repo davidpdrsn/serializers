@@ -12,7 +12,7 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ### Changed
 
-N/A
+- Change syntax for `serializer!` macro to better match normal generics.
 
 ### Removed
 

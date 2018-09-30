@@ -16,7 +16,7 @@ struct Country {
 }
 
 serializer! {
-    serialize_user: User {
+    serialize_user<User> {
         attr(id)
         attr(name)
         has_one(country, serialize_country)
@@ -25,7 +25,7 @@ serializer! {
 }
 
 serializer! {
-    serialize_country: Country {
+    serialize_country<Country> {
         attr(id)
     }
 }
