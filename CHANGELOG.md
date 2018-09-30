@@ -32,14 +32,6 @@ N/A
 
 - Change syntax for `serializer!` macro to better match normal generics.
 
-### Removed
-
-N/A
-
-### Fixed
-
-N/A
-
 ## [0.1.1] - 2018-10-29
 
 Had to bump the version to make the readme show up on [crates.io](https://crates.io/crates/serializers).
@@ -48,5 +40,5 @@ Had to bump the version to make the readme show up on [crates.io](https://crates
 
 Initial release.
 
-[0.1.2]: https://github.com/davidpdrsn/robin/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/davidpdrsn/robin/compare/v0.1.0...v0.1.1
+[0.1.2]: https://github.com/davidpdrsn/serializers/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/davidpdrsn/serializers/compare/v0.1.0...v0.1.1
