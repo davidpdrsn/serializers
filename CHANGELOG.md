@@ -8,6 +8,24 @@ for Rust libraries in [RFC #1105](https://github.com/rust-lang/rfcs/blob/master/
 
 ### Added
 
+N/A
+
+### Changed
+
+N/A
+
+### Removed
+
+N/A
+
+### Fixed
+
+N/A
+
+## [0.1.2] - 2018-10-30
+
+### Added
+
 - Support `pub` and `pub(crate)` serializers from macro.
 
 ### Changed
@@ -30,4 +48,5 @@ Had to bump the version to make the readme show up on [crates.io](https://crates
 
 Initial release.
 
+[0.1.2]: https://github.com/davidpdrsn/robin/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/davidpdrsn/robin/compare/v0.1.0...v0.1.1
