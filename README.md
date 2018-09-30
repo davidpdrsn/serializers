@@ -1,5 +1,9 @@
 # Serializers
 
+[![Build Status](https://travis-ci.org/davidpdrsn/serializers.svg?branch=master)](https://travis-ci.org/davidpdrsn/serializers)
+[![Crates.io](https://img.shields.io/crates/v/serializers.svg)](https://crates.io/crates/serializers)
+[![Documentation](https://docs.rs/serializers/badge.svg)](https://docs.rs/serializers/)
+
 Normally when using "serde_json" and `#[derive(Serialize)]` you only can have one JSON
 representation for a type, however sometimes you might need another one which has more or less
 data.
