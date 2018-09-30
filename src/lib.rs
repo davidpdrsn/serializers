@@ -140,15 +140,38 @@ mod macros;
 /// The trait you implement in order to make a serializer. The key-value pairs will be gathered in
 /// the [`Builder`](struct.Builder.html) and turned into a JSON string by
 /// [`ToJson`](trait.ToJson.html).
-pub trait Serializer<T> {
+pub trait Serializer<'a, T: 'a> {
     /// Add key-value pairs to the builder for the given object.
     ///
     /// You shouldn't have to call this method yourself. Instead you should go through
     /// [`ToJson`](trait.ToJson.html).
     fn serialize_into(&self, value: &T, j: &mut Builder);
+
+    /// Turn the given object into a
+    /// [`serde_json::Value`](https://docs.serde.rs/serde_json/value/enum.Value.html).
+    fn to_value(&self, value: &'a T) -> Value {
+        let mut builder = Builder::new();
+        self.serialize_into(value, &mut builder);
+        builder.to_value()
+    }
+
+    /// Turn the given object into JSON.
+    fn serialize(&self, value: &'a T) -> String {
+        self.to_value(value).to_string()
+    }
+
+    /// Turn the given iterable into JSON array. The main usecase for this is to turn `Vec`s into
+    /// JSON arrays.
+    fn serialize_iter<I>(&self, values: I) -> String
+    where
+        I: IntoIterator<Item = &'a T>,
+    {
+        let acc: Vec<_> = values.into_iter().map(|v| self.to_value(&v)).collect();
+        json!(acc).to_string()
+    }
 }
 
-impl<T, F> Serializer<T> for F
+impl<'a, T: 'a, F> Serializer<'a, T> for F
 where
     F: Fn(&T, &mut Builder),
 {
@@ -192,10 +215,10 @@ impl Builder {
 
     /// Add an object to the JSON. The associated value will be serialized using the given
     /// serializer.
-    pub fn has_one<K, V, S>(&mut self, key: K, value: &V, serializer: &S) -> &mut Self
+    pub fn has_one<'a, K, V: 'a, S>(&mut self, key: K, value: &'a V, serializer: &S) -> &mut Self
     where
         K: Into<String>,
-        S: Serializer<V>,
+        S: Serializer<'a, V>,
     {
         let key: String = key.into();
         let value: Value = serializer.to_value(value);
@@ -208,7 +231,7 @@ impl Builder {
     pub fn has_many<'a, K, V: 'a, S, I>(&mut self, key: K, values: I, serializer: &S) -> &mut Self
     where
         K: Into<String>,
-        S: Serializer<V>,
+        S: Serializer<'a, V>,
         I: IntoIterator<Item = &'a V>,
     {
         let key: String = key.into();
@@ -218,40 +241,5 @@ impl Builder {
             .collect::<Vec<_>>();
         self.map.insert(key, json!(value));
         self
-    }
-}
-
-/// The trait responsible for actually compiling the JSON.
-///
-/// You shouldn't have to implement this trait manually. It will be automatically implemented for
-/// anything that implements [`Serializer`](trait.Serializer.html).
-pub trait ToJson<'a, T: 'a> {
-    /// Turn the given object into a `serde_json::Value`.
-    fn to_value(&self, value: &T) -> Value;
-
-    /// Turn the given object into JSON.
-    fn serialize(&self, value: &T) -> String {
-        self.to_value(value).to_string()
-    }
-
-    /// Turn the given iterable into JSON array. The main usecase for this is to turn `Vec`s into
-    /// JSON arrays.
-    fn serialize_iter<I>(&self, values: I) -> String
-    where
-        I: IntoIterator<Item = &'a T>,
-    {
-        let acc: Vec<_> = values.into_iter().map(|v| self.to_value(&v)).collect();
-        json!(acc).to_string()
-    }
-}
-
-impl<'a, T: 'a, K> ToJson<'a, T> for K
-where
-    K: Serializer<T>,
-{
-    fn to_value(&self, value: &T) -> Value {
-        let mut builder = Builder::new();
-        self.serialize_into(value, &mut builder);
-        builder.to_value()
     }
 }

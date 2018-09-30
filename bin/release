@@ -52,4 +52,3 @@ GIT_COMMITTER_DATE=$(git log -n1 --pretty=%aD) git tag -a -m "Release $version" 
 git push --tags
 
 cargo publish --dry-run
-cargo publish || true

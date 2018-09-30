@@ -16,7 +16,7 @@ N/A
 
 ### Removed
 
-N/A
+- Removed `ToJson` trait. Its could be merged with `Serializer`.
 
 ### Fixed
 
