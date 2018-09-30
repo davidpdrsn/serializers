@@ -10,6 +10,8 @@
 /// The macro also lets you set separate JSON keys and field names. That is done by adding an
 /// additional first argument to `attr`, `has_one`, or `has_many` which will be the key.
 ///
+/// You can also write `pub` in front of the name of your serializer to make the serializer public. Additionally you can write `pub(crate)` to make it public within your crate.
+///
 /// Example:
 ///
 /// ```
@@ -18,19 +20,19 @@
 ///
 /// use serializers::*;
 ///
-/// struct User {
+/// pub struct User {
 ///     id: u64,
 ///     country: Country,
 ///     friends: Vec<User>,
 /// }
 ///
 /// #[derive(Clone)]
-/// struct Country {
+/// pub struct Country {
 ///     id: u64,
 /// }
 ///
 /// serializer! {
-///     serialize_user: User {
+///     pub serialize_user: User {
 ///         attr(identifier, id)
 ///         has_one(homeland, country, serialize_country)
 ///         has_many(buddies, friends, serialize_user)
@@ -38,7 +40,7 @@
 /// }
 ///
 /// serializer! {
-///     serialize_country: Country {
+///     pub(crate) serialize_country: Country {
 ///         attr(code, id)
 ///     }
 /// }
@@ -70,9 +72,29 @@
 /// ```
 #[macro_export]
 macro_rules! serializer {
+    // entry points
+    {
+        pub(crate) $name:ident: $type:ty { $($rest:tt)* }
+    } => {
+        #[allow(missing_docs, dead_code)]
+        pub(crate) fn $name(v: &$type, b: &mut Builder) {
+            serializer! { [b, v] $($rest)* }
+        }
+    };
+
+    {
+        pub $name:ident: $type:ty { $($rest:tt)* }
+    } => {
+        #[allow(missing_docs, dead_code)]
+        pub fn $name(v: &$type, b: &mut Builder) {
+            serializer! { [b, v] $($rest)* }
+        }
+    };
+
     {
         $name:ident: $type:ty { $($rest:tt)* }
     } => {
+        #[allow(missing_docs, dead_code)]
         fn $name(v: &$type, b: &mut Builder) {
             serializer! { [b, v] $($rest)* }
         }
