@@ -173,9 +173,10 @@ use std::collections::HashMap;
 
 mod macros;
 
-/// The trait you implement in order to make a serializer. The key-value pairs will be gathered in
-/// the [`Builder`](struct.Builder.html) and turned into a JSON string by
-/// [`ToJson`](trait.ToJson.html).
+/// The trait you implement in order to make a serializer.
+///
+/// The key-value pairs will be gathered in the [`Builder`](struct.Builder.html) and turned into a
+/// JSON string by [`ToJson`](trait.ToJson.html).
 pub trait Serializer<T> {
     /// Add key-value pairs to the builder for the given object.
     ///
