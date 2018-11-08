@@ -64,8 +64,8 @@
 //!         ],
 //!     };
 //!
+//!     // Serializing a single user
 //!     let json: String = serialize_user.serialize(&bob);
-//!
 //!     assert_eq!(
 //!         json,
 //!         json!({
@@ -82,10 +82,32 @@
 //!             "id": 1
 //!         }).to_string(),
 //!     );
+//!
+//!     // Serializing a vector of users
+//!     let users = vec![bob];
+//!     let json: String = serialize_user.serialize_iter(&users);
+//!     assert_eq!(
+//!         json,
+//!         json!([
+//!             {
+//!                 "country": { "id": 1 },
+//!                 "friends": [
+//!                     {
+//!                         "country": { "id": 1 },
+//!                         "friends": [],
+//!                         "name": "Alice",
+//!                         "id": 2
+//!                     }
+//!                 ],
+//!                 "name": "Bob",
+//!                 "id": 1
+//!             }
+//!         ]).to_string(),
+//!     );
 //! }
 //! ```
 //!
-//! See the [macro docs](macro.serializer.html) for more information about its options.
+//! See the [macro docs](macro.serializer.html) for more information about the `serializer!` macro.
 //!
 //! ## No macros for me
 //!
