@@ -225,7 +225,7 @@ impl Builder {
 ///
 /// You shouldn't have to implement this trait manually. It will be automatically implemented for
 /// anything that implements [`Serializer`](trait.Serializer.html).
-pub trait ToJson<'a, T: 'a> {
+pub trait ToJson<T> {
     /// Turn the given object into a `serde_json::Value`.
     fn to_value(&self, value: &T) -> Value;
 
@@ -236,16 +236,17 @@ pub trait ToJson<'a, T: 'a> {
 
     /// Turn the given iterable into JSON array. The main usecase for this is to turn `Vec`s into
     /// JSON arrays.
-    fn serialize_iter<I>(&self, values: I) -> String
+    fn serialize_iter<'a, I>(&self, values: I) -> String
     where
         I: IntoIterator<Item = &'a T>,
+        T: 'a,
     {
         let acc: Vec<_> = values.into_iter().map(|v| self.to_value(&v)).collect();
         json!(acc).to_string()
     }
 }
 
-impl<'a, T: 'a, K> ToJson<'a, T> for K
+impl<T, K> ToJson<T> for K
 where
     K: Serializer<T>,
 {

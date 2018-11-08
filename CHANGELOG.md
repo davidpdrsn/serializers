@@ -12,7 +12,7 @@ N/A
 
 ### Changed
 
-N/A
+- Move the generic `'a` lifetime on `ToJson` from the trait itself to the method that actually needs it. This might be a breaking change for users who directly use the `ToJson` trait, but it should be quick fix.
 
 ### Removed
 
