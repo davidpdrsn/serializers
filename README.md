@@ -24,6 +24,8 @@ serializers = "0.1.2"
 ```rust
 #[macro_use]
 extern crate serializers;
+#[macro_use]
+extern crate serde_json;
 
 use serializers::*;
 
@@ -73,11 +75,23 @@ fn main() {
         ],
     };
 
-    let json = serialize_user.serialize(&bob);
+    let json: String = serialize_user.serialize(&bob);
 
     assert_eq!(
         json,
-        "{\"country\":{\"id\":1},\"friends\":[{\"country\":{\"id\":1},\"friends\":[],\"id\":2,\"name\":\"Alice\"}],\"id\":1,\"name\":\"Bob\"}"
+        json!({
+            "country": { "id": 1 },
+            "friends": [
+                {
+                    "country": { "id": 1 },
+                    "friends": [],
+                    "name": "Alice",
+                    "id": 2
+                }
+            ],
+            "name": "Bob",
+            "id": 1
+        }).to_string(),
     );
 }
 ```

@@ -17,6 +17,8 @@
 /// ```
 /// #[macro_use]
 /// extern crate serializers;
+/// #[macro_use]
+/// extern crate serde_json;
 ///
 /// use serializers::*;
 ///
@@ -62,11 +64,21 @@
 ///         ],
 ///     };
 ///
-///     let json = serialize_user.serialize(&bob);
+///     let json: String = serialize_user.serialize(&bob);
 ///
 ///     assert_eq!(
 ///         json,
-///         "{\"buddies\":[{\"buddies\":[],\"homeland\":{\"code\":1},\"identifier\":2}],\"homeland\":{\"code\":1},\"identifier\":1}"
+///         json!({
+///             "buddies": [
+///                 {
+///                     "buddies": [],
+///                     "homeland": { "code": 1 },
+///                     "identifier": 2
+///                 }
+///             ],
+///             "homeland": { "code": 1 },
+///             "identifier": 1
+///         }).to_string(),
 ///     );
 /// }
 /// ```
