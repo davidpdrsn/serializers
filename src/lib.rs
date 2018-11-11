@@ -208,15 +208,6 @@ pub trait Serializer<T> {
     }
 }
 
-impl<T, F> Serializer<T> for F
-where
-    F: Fn(&T, &mut Builder),
-{
-    fn serialize_into(&self, value: &T, b: &mut Builder) {
-        self(&value, b);
-    }
-}
-
 /// The struct responsible for gathering keys and values for the JSON.
 ///
 /// This is the struct you interact with through the

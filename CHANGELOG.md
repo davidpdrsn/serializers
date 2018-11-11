@@ -18,6 +18,7 @@ N/A
 ### Removed
 
 - Since the generic lifetime on `ToJson` has been removed, the whole trait can actually be removed. All its methods has been moved to `Serializer`.
+- Auto implementation for functions with special signature. It is not longer needed since the macro now generates structs.
 
 ### Fixed
 
