@@ -13,6 +13,7 @@ N/A
 ### Changed
 
 - Move the generic `'a` lifetime on `ToJson` from the trait itself to the method that actually needs it. This might be a breaking change for users who directly use the `ToJson` trait, but it should be quick fix.
+- Create a struct from `serializer!` macro rather than a function. While generating a function did work I think this approach is simpler and more inline with what users would expect.
 
 ### Removed
 

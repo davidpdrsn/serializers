@@ -42,16 +42,16 @@ struct Country {
 }
 
 serializer! {
-    serialize_user<User> {
+    struct UserSerializer<User> {
         attr(id)
         attr(name)
-        has_one(country, serialize_country)
-        has_many(friends, serialize_user)
+        has_one(country, CountrySerializer)
+        has_many(friends, UserSerializer)
     }
 }
 
 serializer! {
-    serialize_country<Country> {
+    struct CountrySerializer<Country> {
         attr(id)
     }
 }
@@ -75,7 +75,7 @@ fn main() {
         ],
     };
 
-    let json: String = serialize_user.serialize(&bob);
+    let json: String = UserSerializer::serialize(&bob);
 
     assert_eq!(
         json,

@@ -31,16 +31,16 @@
 //! }
 //!
 //! serializer! {
-//!     serialize_user<User> {
+//!     struct UserSerializer<User> {
 //!         attr(id)
 //!         attr(name)
-//!         has_one(country, serialize_country)
-//!         has_many(friends, serialize_user)
+//!         has_one(country, CountrySerializer)
+//!         has_many(friends, UserSerializer)
 //!     }
 //! }
 //!
 //! serializer! {
-//!     serialize_country<Country> {
+//!     struct CountrySerializer<Country> {
 //!         attr(id)
 //!     }
 //! }
@@ -65,7 +65,7 @@
 //!     };
 //!
 //!     // Serializing a single user
-//!     let json: String = serialize_user.serialize(&bob);
+//!     let json: String = UserSerializer::serialize(&bob);
 //!     assert_eq!(
 //!         json,
 //!         json!({
@@ -85,7 +85,7 @@
 //!
 //!     // Serializing a vector of users
 //!     let users = vec![bob];
-//!     let json: String = serialize_user.serialize_iter(&users);
+//!     let json: String = UserSerializer::serialize_iter(&users);
 //!     assert_eq!(
 //!         json,
 //!         json!([
@@ -131,16 +131,20 @@
 //! # }
 //! #
 //! # serializer! {
-//! #     serialize_country<Country> {
+//! #     struct CountrySerializer<Country> {
 //! #         attr(id)
 //! #     }
 //! # }
 //! #
-//! fn serialize_user(user: &User, b: &mut Builder) {
-//!     b.attr("id", &user.id);
-//!     b.attr("name", &user.name);
-//!     b.has_one("country", &user.country, &serialize_country);
-//!     b.has_many("friends", &user.friends, &serialize_user);
+//! struct UserSerializer;
+//!
+//! impl Serializer<User> for UserSerializer {
+//!     fn serialize_into(&self, user: &User, b: &mut Builder) {
+//!         b.attr("id", &user.id);
+//!         b.attr("name", &user.name);
+//!         b.has_one("country", &user.country, &CountrySerializer);
+//!         b.has_many("friends", &user.friends, &UserSerializer);
+//!     }
 //! }
 //! #
 //! # fn main() {}
@@ -168,6 +172,7 @@ extern crate serde;
 #[macro_use]
 extern crate serde_json;
 
+use serde::Serialize;
 use serde_json::Value;
 use std::collections::HashMap;
 
@@ -182,7 +187,7 @@ pub trait Serializer<T> {
     ///
     /// You shouldn't have to call this method yourself. Instead you should go through
     /// [`ToJson`](trait.ToJson.html).
-    fn serialize_into(&self, value: &T, j: &mut Builder);
+    fn serialize_into(&self, value: &T, builder: &mut Builder);
 }
 
 impl<T, F> Serializer<T> for F
@@ -219,7 +224,7 @@ impl Builder {
     pub fn attr<K, V>(&mut self, key: K, value: &V) -> &mut Self
     where
         K: Into<String>,
-        V: serde::Serialize,
+        V: Serialize,
     {
         let key: String = key.into();
         let value: Value = json!(value);
@@ -291,5 +296,27 @@ where
         let mut builder = Builder::new();
         self.serialize_into(value, &mut builder);
         builder.to_value()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn generated_associated_function() {
+        struct User {
+            id: u64,
+        }
+
+        serializer! {
+            struct UserSerializer<User> {
+                attr(id)
+            }
+        }
+
+        let bob = User { id: 1 };
+        let json: String = UserSerializer::serialize(&bob);
+        assert_eq!(json, json!({ "id": 1 }).to_string());
     }
 }

@@ -34,15 +34,15 @@
 /// }
 ///
 /// serializer! {
-///     pub serialize_user<User> {
+///     pub struct UserSerializer<User> {
 ///         attr(identifier, id)
-///         has_one(homeland, country, serialize_country)
-///         has_many(buddies, friends, serialize_user)
+///         has_one(homeland, country, CountrySerializer)
+///         has_many(buddies, friends, UserSerializer)
 ///     }
 /// }
 ///
 /// serializer! {
-///     pub(crate) serialize_country<Country> {
+///     pub(crate) struct CountrySerializer<Country> {
 ///         attr(code, id)
 ///     }
 /// }
@@ -64,7 +64,7 @@
 ///         ],
 ///     };
 ///
-///     let json: String = serialize_user.serialize(&bob);
+///     let json: String = UserSerializer::serialize(&bob);
 ///
 ///     assert_eq!(
 ///         json,
@@ -86,29 +86,50 @@
 macro_rules! serializer {
     // entry points
     {
-        pub(crate) $name:ident<$type:ty> { $($rest:tt)* }
+        pub(crate) struct $name:ident<$type:ty> { $($rest:tt)* }
     } => {
         #[allow(missing_docs, dead_code)]
-        pub(crate) fn $name(v: &$type, b: &mut Builder) {
-            serializer! { [b, v] $($rest)* }
-        }
+        pub(crate) struct $name;
+        serializer! { impl $name<$type> { $($rest)* } }
     };
 
     {
-        pub $name:ident<$type:ty> { $($rest:tt)* }
+        pub struct $name:ident<$type:ty> { $($rest:tt)* }
     } => {
         #[allow(missing_docs, dead_code)]
-        pub fn $name(v: &$type, b: &mut Builder) {
-            serializer! { [b, v] $($rest)* }
-        }
+        pub struct $name;
+        serializer! { impl $name<$type> { $($rest)* } }
     };
 
     {
-        $name:ident<$type:ty> { $($rest:tt)* }
+        struct $name:ident<$type:ty> { $($rest:tt)* }
     } => {
         #[allow(missing_docs, dead_code)]
-        fn $name(v: &$type, b: &mut Builder) {
-            serializer! { [b, v] $($rest)* }
+        struct $name;
+        serializer! { impl $name<$type> { $($rest)* } }
+    };
+
+    {
+        impl $name:ident<$type:ty> { $($rest:tt)* }
+    } => {
+        impl $crate::Serializer<$type> for $name {
+            fn serialize_into(&self, v: &$type, b: &mut $crate::Builder) {
+                serializer! { [b, v] $($rest)* }
+            }
+        }
+
+        #[allow(dead_code)]
+        impl $name {
+            fn serialize(v: &$type) -> String {
+                $name.serialize(v)
+            }
+
+            fn serialize_iter<'a, I>(v: I) -> String
+            where
+                I: IntoIterator<Item = &'a $type>,
+            {
+                $name.serialize_iter(v)
+            }
         }
     };
 
