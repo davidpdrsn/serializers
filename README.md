@@ -42,6 +42,7 @@ struct Country {
 }
 
 serializer! {
+    #[derive(Debug, Copy, Clone)]
     struct UserSerializer<User> {
         attr(id)
         attr(name)
@@ -51,6 +52,7 @@ serializer! {
 }
 
 serializer! {
+    #[derive(Debug, Copy, Clone)]
     struct CountrySerializer<Country> {
         attr(id)
     }

@@ -31,6 +31,7 @@
 //! }
 //!
 //! serializer! {
+//!     #[derive(Debug)]
 //!     struct UserSerializer<User> {
 //!         attr(id)
 //!         attr(name)
@@ -40,6 +41,7 @@
 //! }
 //!
 //! serializer! {
+//!     #[derive(Debug)]
 //!     struct CountrySerializer<Country> {
 //!         attr(id)
 //!     }
@@ -149,10 +151,6 @@
 //! #
 //! # fn main() {}
 //! ```
-//!
-//! Any function with such a signature will automatically become a [`Serializer`](trait.Serializer.html).
-//!
-//! Using the serializer function afterwards works the same as if you used the macro.
 
 #![deny(
     missing_docs,
@@ -302,6 +300,72 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    macro_rules! test_user_serializer {
+        {
+            $($tokens:tt)*
+        } => {
+            struct User {
+                id: u64,
+            }
+
+            serializer! {
+                $($tokens)*
+            }
+
+            let bob = User { id: 1 };
+            let json: String = UserSerializer::serialize(&bob);
+            assert_eq!(json, json!({ "id": 1 }).to_string());
+        };
+    }
+
+    #[test]
+    fn test_pub_crate() {
+        test_user_serializer! {
+            pub(crate) struct UserSerializer<User> { attr(id) }
+        };
+    }
+
+    #[test]
+    fn test_pub() {
+        test_user_serializer! {
+            pub struct UserSerializer<User> { attr(id) }
+        };
+    }
+
+    #[test]
+    fn test_private() {
+        test_user_serializer! {
+            struct UserSerializer<User> { attr(id) }
+        };
+    }
+
+    #[test]
+    fn test_pub_crate_attrs() {
+        test_user_serializer! {
+            #[derive(PartialEq, Eq, Debug)]
+            pub(crate) struct UserSerializer<User> { attr(id) }
+        };
+        assert_eq!(UserSerializer, UserSerializer);
+    }
+
+    #[test]
+    fn test_pub_attrs() {
+        test_user_serializer! {
+            #[derive(PartialEq, Eq, Debug)]
+            pub struct UserSerializer<User> { attr(id) }
+        };
+        assert_eq!(UserSerializer, UserSerializer);
+    }
+
+    #[test]
+    fn test_private_attrs() {
+        test_user_serializer! {
+            #[derive(PartialEq, Eq, Debug)]
+            struct UserSerializer<User> { attr(id) }
+        };
+        assert_eq!(UserSerializer, UserSerializer);
+    }
 
     #[test]
     fn generated_associated_function() {

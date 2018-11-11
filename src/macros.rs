@@ -1,16 +1,16 @@
 /// This macro is the primary way to make serializers. See the [top level docs](index.html) for an
 /// example.
 ///
-/// This macro expands into a function the implements [`Serializer`](trait.Serializer.html). This
-/// is because [`Serializer<T>`](trait.Serializer.html) is automatically implemented for functions
-/// with the signature `Fn(&T, &mut Builder)`.
+/// It expands into a struct the implements [`Serializer`](trait.Serializer.html).
 ///
 /// ## Customization
 ///
 /// The macro also lets you set separate JSON keys and field names. That is done by adding an
 /// additional first argument to `attr`, `has_one`, or `has_many` which will be the key.
 ///
-/// You can also write `pub` in front of the name of your serializer to make the serializer public. Additionally you can write `pub(crate)` to make it public within your crate.
+/// You can also write `pub` in front of the name of your strcut to make it public. Additionally you can write `pub(crate)` to make it public within your crate.
+///
+/// You can also add `#[derive(...)]` above the struct definition.
 ///
 /// Example:
 ///
@@ -34,6 +34,7 @@
 /// }
 ///
 /// serializer! {
+///     #[derive(Debug)]
 ///     pub struct UserSerializer<User> {
 ///         attr(identifier, id)
 ///         has_one(homeland, country, CountrySerializer)
@@ -42,6 +43,7 @@
 /// }
 ///
 /// serializer! {
+///     #[derive(Debug)]
 ///     pub(crate) struct CountrySerializer<Country> {
 ///         attr(code, id)
 ///     }
@@ -86,27 +88,110 @@
 macro_rules! serializer {
     // entry points
     {
-        pub(crate) struct $name:ident<$type:ty> { $($rest:tt)* }
+        #[derive( $($derive_tokens:tt),* )]
+        pub(crate) struct $name:ident<$type:ty> { $($body:tt)* }
     } => {
-        #[allow(missing_docs, dead_code)]
-        pub(crate) struct $name;
-        serializer! { impl $name<$type> { $($rest)* } }
+        __serializer! {
+            derives = [ $($derive_tokens),* ],
+            struct_def = { pub(crate) struct $name; },
+            name = ($name),
+            ttype = ($type),
+            body = ( $($body)* ),
+        }
     };
 
     {
-        pub struct $name:ident<$type:ty> { $($rest:tt)* }
+        pub(crate) struct $name:ident<$type:ty> { $($body:tt)* }
     } => {
-        #[allow(missing_docs, dead_code)]
-        pub struct $name;
-        serializer! { impl $name<$type> { $($rest)* } }
+        __serializer! {
+            derives = [],
+            struct_def = { pub(crate) struct $name; },
+            name = ($name),
+            ttype = ($type),
+            body = ( $($body)* ),
+        }
     };
 
     {
-        struct $name:ident<$type:ty> { $($rest:tt)* }
+        #[derive( $($derive_tokens:tt),* )]
+        pub struct $name:ident<$type:ty> { $($body:tt)* }
     } => {
-        #[allow(missing_docs, dead_code)]
-        struct $name;
-        serializer! { impl $name<$type> { $($rest)* } }
+        __serializer! {
+            derives = [ $($derive_tokens),* ],
+            struct_def = { pub struct $name; },
+            name = ($name),
+            ttype = ($type),
+            body = ( $($body)* ),
+        }
+    };
+
+    {
+        pub struct $name:ident<$type:ty> { $($body:tt)* }
+    } => {
+        __serializer! {
+            derives = [],
+            struct_def = { pub(crate) struct $name; },
+            name = ($name),
+            ttype = ($type),
+            body = ( $($body)* ),
+        }
+    };
+
+
+    {
+        #[derive( $($derive_tokens:tt),* )]
+        struct $name:ident<$type:ty> { $($body:tt)* }
+    } => {
+        __serializer! {
+            derives = [ $($derive_tokens),* ],
+            struct_def = { struct $name; },
+            name = ($name),
+            ttype = ($type),
+            body = ( $($body)* ),
+        }
+    };
+
+    {
+        struct $name:ident<$type:ty> { $($body:tt)* }
+    } => {
+        __serializer! {
+            derives = [],
+            struct_def = { pub(crate) struct $name; },
+            name = ($name),
+            ttype = ($type),
+            body = ( $($body)* ),
+        }
+    };
+
+
+}
+
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __serializer {
+    {
+        derives = [],
+        struct_def = { $($struct_def_tokens:tt)* },
+        name = ( $name:ident ),
+        ttype = ( $type:ty ),
+        body = ( $($body:tt)* ),
+    } => {
+        #[allow(dead_code, missing_docs)]
+        $($struct_def_tokens)*
+        __serializer! { impl $name<$type> { $($body)* } }
+    };
+
+    {
+        derives = [ $($derive_tokens:tt),* ],
+        struct_def = { $($struct_def_tokens:tt)* },
+        name = ( $name:ident ),
+        ttype = ( $type:ty ),
+        body = ( $($body:tt)* ),
+    } => {
+        #[allow(dead_code, missing_docs)]
+        #[derive( $($derive_tokens),* )]
+        $($struct_def_tokens)*
+        __serializer! { impl $name<$type> { $($body)* } }
     };
 
     {
@@ -114,7 +199,7 @@ macro_rules! serializer {
     } => {
         impl $crate::Serializer<$type> for $name {
             fn serialize_into(&self, v: &$type, b: &mut $crate::Builder) {
-                serializer! { [b, v] $($rest)* }
+                __serializer! { [b, v] $($rest)* }
             }
         }
 
@@ -140,41 +225,41 @@ macro_rules! serializer {
     {
         [$b:expr, $v:expr] attr($attr:ident) $($rest:tt)*
     } => {
-        serializer! { [$b, $v] attr($attr, $attr) $($rest)* }
+        __serializer! { [$b, $v] attr($attr, $attr) $($rest)* }
     };
 
     {
         [$b:expr, $v:expr] attr($key:ident, $field:ident) $($rest:tt)*
     } => {
         $b.attr(stringify!($key), &$v.$field);
-        serializer! { [$b, $v] $($rest)* }
+        __serializer! { [$b, $v] $($rest)* }
     };
 
     // has_one
     {
         [$b:expr, $v:expr] has_one($key:ident, $has_one_ser:ident) $($rest:tt)*
     } => {
-        serializer! { [$b, $v] has_one($key, $key, $has_one_ser) $($rest)* }
+        __serializer! { [$b, $v] has_one($key, $key, $has_one_ser) $($rest)* }
     };
 
     {
         [$b:expr, $v:expr] has_one($key:ident, $field:ident, $has_one_ser:ident) $($rest:tt)*
     } => {
         $b.has_one(stringify!($key), &$v.$field, &$has_one_ser);
-        serializer! { [$b, $v] $($rest)* }
+        __serializer! { [$b, $v] $($rest)* }
     };
 
     // has_many
     {
         [$b:expr, $v:expr] has_many($key:ident, $has_one_ser:ident) $($rest:tt)*
     } => {
-        serializer! { [$b, $v] has_many($key, $key, $has_one_ser) $($rest)* }
+        __serializer! { [$b, $v] has_many($key, $key, $has_one_ser) $($rest)* }
     };
 
     {
         [$b:expr, $v:expr] has_many($key:ident, $field:ident, $has_one_ser:ident) $($rest:tt)*
     } => {
         $b.has_many(stringify!($key), &$v.$field, &$has_one_ser);
-        serializer! { [$b, $v] $($rest)* }
+        __serializer! { [$b, $v] $($rest)* }
     };
 }
