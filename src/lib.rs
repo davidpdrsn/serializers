@@ -177,15 +177,35 @@ use std::collections::HashMap;
 mod macros;
 
 /// The trait you implement in order to make a serializer.
-///
-/// The key-value pairs will be gathered in the [`Builder`](struct.Builder.html) and turned into a
-/// JSON string by [`ToJson`](trait.ToJson.html).
 pub trait Serializer<T> {
     /// Add key-value pairs to the builder for the given object.
     ///
-    /// You shouldn't have to call this method yourself. Instead you should go through
-    /// [`ToJson`](trait.ToJson.html).
+    /// You shouldn't have to call this method yourself. It'll be called by other method in this
+    /// trait.
     fn serialize_into(&self, value: &T, builder: &mut Builder);
+
+    /// Turn the given object into a `serde_json::Value`.
+    fn to_value(&self, value: &T) -> Value {
+        let mut builder = Builder::new();
+        self.serialize_into(value, &mut builder);
+        builder.to_value()
+    }
+
+    /// Turn the given object into a JSON string.
+    fn serialize(&self, value: &T) -> String {
+        self.to_value(value).to_string()
+    }
+
+    /// Turn the given iterable into JSON array. The main usecase for this is to turn `Vec`s into
+    /// JSON arrays, but works for any iterator.
+    fn serialize_iter<'a, I>(&self, values: I) -> String
+    where
+        I: IntoIterator<Item = &'a T>,
+        T: 'a,
+    {
+        let acc: Vec<_> = values.into_iter().map(|v| self.to_value(&v)).collect();
+        json!(acc).to_string()
+    }
 }
 
 impl<T, F> Serializer<T> for F
@@ -258,42 +278,6 @@ impl Builder {
             .collect::<Vec<_>>();
         self.map.insert(key, json!(value));
         self
-    }
-}
-
-/// The trait responsible for actually compiling the JSON.
-///
-/// You shouldn't have to implement this trait manually. It will be automatically implemented for
-/// anything that implements [`Serializer`](trait.Serializer.html).
-pub trait ToJson<T> {
-    /// Turn the given object into a `serde_json::Value`.
-    fn to_value(&self, value: &T) -> Value;
-
-    /// Turn the given object into JSON.
-    fn serialize(&self, value: &T) -> String {
-        self.to_value(value).to_string()
-    }
-
-    /// Turn the given iterable into JSON array. The main usecase for this is to turn `Vec`s into
-    /// JSON arrays.
-    fn serialize_iter<'a, I>(&self, values: I) -> String
-    where
-        I: IntoIterator<Item = &'a T>,
-        T: 'a,
-    {
-        let acc: Vec<_> = values.into_iter().map(|v| self.to_value(&v)).collect();
-        json!(acc).to_string()
-    }
-}
-
-impl<T, K> ToJson<T> for K
-where
-    K: Serializer<T>,
-{
-    fn to_value(&self, value: &T) -> Value {
-        let mut builder = Builder::new();
-        self.serialize_into(value, &mut builder);
-        builder.to_value()
     }
 }
 

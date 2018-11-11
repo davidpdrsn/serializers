@@ -17,7 +17,7 @@ N/A
 
 ### Removed
 
-N/A
+- Since the generic lifetime on `ToJson` has been removed, the whole trait can actually be removed. All its methods has been moved to `Serializer`.
 
 ### Fixed
 
