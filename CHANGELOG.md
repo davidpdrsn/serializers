@@ -22,6 +22,12 @@ N/A
 
 N/A
 
+## [0.2.2] - 2018-11-12
+
+### Fixed
+
+- Fixed `documentation` key in `Cargo.toml`.
+
 ## [0.2.1] - 2018-11-12
 
 No changes. Had to release new version to trigger rebuild of docs on crates.io.
@@ -56,6 +62,7 @@ Had to bump the version to make the readme show up on [crates.io](https://crates
 
 Initial release.
 
+[0.2.2]: https://github.com/davidpdrsn/serializers/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/davidpdrsn/serializers/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/davidpdrsn/serializers/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/davidpdrsn/serializers/compare/v0.1.1...v0.1.2
