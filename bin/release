@@ -48,6 +48,8 @@ else
   echo "Cargo.toml isn't set to version $version_without_v"
 fi
 
+git push
+
 GIT_COMMITTER_DATE=$(git log -n1 --pretty=%aD) git tag -a -m "Release $version" $version
 git push --tags
 
