@@ -9,7 +9,8 @@ license = "MIT"
 name = "serializers"
 readme = "README.md"
 repository = "https://github.com/davidpdrsn/serializers.git"
-version = "0.2.0"
+version = "0.2.1"
+documentation = "https://docs.serde.rs/serializers/"
 
 [dependencies]
 serde = "1.0.79"
