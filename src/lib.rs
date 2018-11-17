@@ -164,7 +164,7 @@
     unused_import_braces,
     unused_qualifications
 )]
-#![doc(html_root_url = "https://docs.rs/serializers/0.2.2")]
+#![doc(html_root_url = "https://docs.rs/serializers/0.2.3")]
 
 extern crate serde;
 #[macro_use]
