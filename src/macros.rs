@@ -130,7 +130,7 @@ macro_rules! serializer {
     } => {
         __serializer! {
             derives = [],
-            struct_def = { pub(crate) struct $name; },
+            struct_def = { pub struct $name; },
             name = ($name),
             ttype = ($type),
             body = ( $($body)* ),
@@ -156,7 +156,7 @@ macro_rules! serializer {
     } => {
         __serializer! {
             derives = [],
-            struct_def = { pub(crate) struct $name; },
+            struct_def = { struct $name; },
             name = ($name),
             ttype = ($type),
             body = ( $($body)* ),

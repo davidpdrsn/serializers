@@ -20,7 +20,7 @@ N/A
 
 ### Fixed
 
-N/A
+- Incorrect visibility for serializers made using macro.
 
 ## [0.2.2] - 2018-11-12
 
